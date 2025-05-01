@@ -1,0 +1,45 @@
+$date
+	Wed Apr 30 04:20:31 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module half_tasizan_test $end
+$var wire 1 ! s $end
+$var wire 1 " c $end
+$var parameter 32 # STEP $end
+$var reg 1 $ a $end
+$var reg 1 % b $end
+$scope module tashichan $end
+$var wire 1 $ A $end
+$var wire 1 % B $end
+$var wire 1 " C $end
+$var wire 1 ! S $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b1100100 #
+$end
+#0
+$dumpvars
+0%
+0$
+0"
+0!
+$end
+#100000
+1!
+1%
+#200000
+0%
+1$
+#300000
+1"
+0!
+1%
+#400000

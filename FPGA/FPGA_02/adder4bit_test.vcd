@@ -1,0 +1,49 @@
+$date
+	Wed Apr 30 05:33:56 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module adder4bit_test $end
+$var wire 9 ! res [8:0] $end
+$var parameter 32 " STEP $end
+$var reg 8 # a [7:0] $end
+$var reg 8 $ b [7:0] $end
+$scope module tashichan $end
+$var wire 8 % a [7:0] $end
+$var wire 8 & b [7:0] $end
+$var wire 9 ' s [8:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b1100100 "
+$end
+#0
+$dumpvars
+b0 '
+b0 &
+b0 %
+b0 $
+b0 #
+b0 !
+$end
+#100000
+b1001101 $
+b1001101 &
+b10110001 !
+b10110001 '
+b1100100 #
+b1100100 %
+#200000
+b100011 $
+b100011 &
+b1101001 !
+b1101001 '
+b1000110 #
+b1000110 %
+#300000
