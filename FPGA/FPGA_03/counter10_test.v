@@ -10,7 +10,7 @@ module counter10_test;
     parameter STEP = 1000; // time step for each test case
 
     // dff4bit dff4_0(clk, rst, d, q); // instantiate the dff module
-    counter10 counter10_0(clk, rst, cnt); // instantiate the counter10 module
+    counter10_2 counter10_0(clk, rst, cnt); // instantiate the counter10 module
 
     always begin // clock generation
         clk = 1'b0;

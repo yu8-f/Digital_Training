@@ -1,0 +1,38 @@
+# コンパイル生成物
+*.out
+*.vcd
+*.o
+*.obj
+*.exe
+*.log
+*.tmp
+*.bin
+*.elf
+*.map
+
+# シミュレーションファイル (Verilog/VHDLなどでよく出るもの)
+*.vvp
+*.lxt
+*.vcd
+*.fst
+*.saif
+*.wlf
+
+# エディタ・IDE関連
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# OSごとの不要ファイル
+.DS_Store
+Thumbs.db
+
+# Git関連
+*.orig
+
+# その他
+node_modules/
+dist/
+build/
