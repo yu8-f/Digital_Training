@@ -21,8 +21,16 @@ module counter10(clk, rst, cnt);
                 4'h6: incr = 4'h7;
                 4'h7: incr = 4'h8;
                 4'h8: incr = 4'h9;
-                4'h9: incr = 4'h10;
+                4'h9: incr = 4'ha;
                 default : incr = 4'h0; // reset to 0 if input is not in the range
             endcase
 
     endfunction
+
+    assign d = incr(q); // increment the value of q using the incr function
+
+    dff4bit dff4_0(clk, rst, d, q);
+
+    assign cnt = q;
+
+endmodule
