@@ -42,9 +42,11 @@ module e_calc_tb;
             $dumpvars(1, dut.square_out[i]); // 👈 これを追加！！
             $dumpvars(1, dut.squarer.multi_out[i]); // 👈 これを追加！！
             $dumpvars(1, dut.squarer.buffer[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.multi_out[i]); // 👈 これを追加！！
             $dumpvars(1, dut.squarer.multiplier.A[i]); // 👈 これを追加！！
             $dumpvars(1, dut.squarer.multiplier.B[i]); // 👈 これを追加！！
             $dumpvars(1, dut.squarer.multiplier.temp[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.multiplier.product[i]); // 👈 これを追加！！
         end
         rst_n = 0;
         start = 0;
