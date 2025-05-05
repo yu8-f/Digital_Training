@@ -1,13 +1,21 @@
 module e_calc_square #(
-    parameter WORDS = 32,
-    parameter LOG2_N = 15
+    parameter int WORDS = 32,
+    parameter int LOG2_N = 15  // 2^15回二乗する（例）
 )(
     input  logic clk,
     input  logic rst_n,
     input  logic start,
+    input  logic [15:0] in_data [0:WORDS-1],
     output logic done,
-    output logic [16*WORDS-1:0] out_data
+    output logic [15:0] out_data [0:WORDS-1]
 );
+
+    // 内部信号
+    logic [15:0] buffer [0:WORDS-1];
+    logic [3:0] count;
+    logic multi_start;
+    logic multi_done;
+    logic [15:0] multi_out [0:WORDS-1];
 
     typedef enum logic [1:0] {
         IDLE,
@@ -15,58 +23,77 @@ module e_calc_square #(
         WAIT_MULTI,
         DONE
     } state_t;
-
     state_t state, next_state;
-    logic [16*WORDS-1:0] result;
-    logic [16*2*WORDS-1:0] multi_out;
-    logic multi_start;
-    logic multi_done;
-    logic [15:0] one_word;
-    integer count;
 
+    // インスタンス：乗算器
     e_multi #(
         .WORDS(WORDS)
-    ) u_multi (
-        .in_a(result),
-        .in_b(result),
-        .out_data(multi_out)
+    ) multiplier (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start(multi_start),
+        .A(buffer),
+        .B(buffer),
+        .done(multi_done),
+        .product(multi_out)
     );
 
+    // ステートマシン
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+        if (!rst_n)
             state <= IDLE;
-            count <= 0;
-            result <= 0;
-        end else begin
+        else
             state <= next_state;
-            if (state == RUN && next_state == WAIT_MULTI) begin
-                count <= count + 1;
-            end
-            if (state == IDLE && start) begin
-                // 初期値 (1 + 1/n)
-                result <= { {(WORDS-2){16'd0}}, 16'd1, 16'd1 };
-                count <= 0;
-            end else if (state == WAIT_MULTI && multi_done) begin
-                result <= multi_out[16*WORDS-1:0];
-            end
-        end
     end
 
     always_comb begin
         next_state = state;
-        multi_start = 0;
         case (state)
             IDLE: if (start) next_state = RUN;
-            RUN: begin
-                multi_start = 1;
-                next_state = WAIT_MULTI;
-            end
+            RUN: next_state = WAIT_MULTI;
             WAIT_MULTI: if (multi_done) next_state = (count == LOG2_N-1) ? DONE : RUN;
             DONE: next_state = DONE;
+            default: next_state = IDLE;
         endcase
     end
 
+    // ロジック
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            count <= 0;
+            multi_start <= 0;
+            for (int i = 0; i < WORDS; i++) begin
+                buffer[i] <= 0;
+            end
+        end else begin
+            case (state)
+                IDLE: begin
+                    count <= 0;
+                    multi_start <= 0;
+                    for (int i = 0; i < WORDS; i++) begin
+                        buffer[i] <= in_data[i];
+                    end
+                end
+                RUN: begin
+                    multi_start <= 1;  // 乗算開始
+                end
+                WAIT_MULTI: begin
+                    multi_start <= 0;
+                    if (multi_done) begin
+                        count <= count + 1;
+                        for (int i = 0; i < WORDS; i++) begin
+                            buffer[i] <= multi_out[i];
+                        end
+                    end
+                end
+                DONE: begin
+                    // 何もしない
+                end
+            endcase
+        end
+    end
+
     assign done = (state == DONE);
-    assign out_data = result;
+    assign out_data = buffer;
 
 endmodule

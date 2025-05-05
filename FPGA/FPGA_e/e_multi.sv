@@ -1,46 +1,60 @@
 module e_multi #(
-    parameter WORDS = 32
+    parameter int WORDS = 32
 )(
-    input  logic [16*WORDS-1:0] in_a,
-    input  logic [16*WORDS-1:0] in_b,
-    output logic [16*2*WORDS-1:0] out_data
+    input  logic clk,
+    input  logic rst_n,
+    input  logic start,
+    input  logic [15:0] A [0:WORDS-1],
+    input  logic [15:0] B [0:WORDS-1],
+    output logic done,
+    output logic [15:0] product [0:WORDS-1]
 );
 
-    logic [31:0] temp [2*WORDS-1:0];
-    logic [15:0] a [WORDS-1:0];
-    logic [15:0] b [WORDS-1:0];
+    // 内部レジスタ
+    logic [31:0] temp [0:2*WORDS-1];
+    integer i, j;
+    logic calc_done;
+    logic calc_running;
 
-    integer i;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            calc_done <= 0;
+            calc_running <= 0;
+            for (i = 0; i < 2*WORDS; i++) begin
+                temp[i] <= 32'd0;
+            end
+        end else begin
+            if (start && !calc_running) begin
+                // 計算開始
+                calc_running <= 1;
+                calc_done <= 0;
 
-    always_comb begin
-        for (i = 0; i < WORDS; i++) begin
-            a[i] = in_a[i*16 +: 16];
-            b[i] = in_b[i*16 +: 16];
-        end
-
-        for (i = 0; i < 2*WORDS; i++) begin
-            temp[i] = 0;
-        end
-
-        for (i = 0; i < WORDS; i++) begin
-            temp[i] = a[i] * b[0];
-        end
-
-        for (int j = 1; j < WORDS; j++) begin
-            for (i = 0; i < WORDS; i++) begin
-                temp[i+j] += a[i] * b[j];
+                // 掛け算（多倍長）
+                for (i = 0; i < WORDS; i++) begin
+                    for (j = 0; j < WORDS; j++) begin
+                        temp[i+j] <= temp[i+j] + (A[i] * B[j]);
+                    end
+                end
+            end else if (calc_running) begin
+                // 繰り上がり処理
+                for (i = 0; i < 2*WORDS-1; i++) begin
+                    temp[i+1] <= temp[i+1] + (temp[i] >> 16);
+                    temp[i] <= temp[i] & 16'hFFFF;
+                end
+                calc_done <= 1;
+                calc_running <= 0;
             end
         end
-
-        for (i = 0; i < 2*WORDS-1; i++) begin
-            temp[i+1] += temp[i] >> 16;
-            temp[i] &= 16'hFFFF;
-        end
-        temp[2*WORDS-1] &= 16'hFFFF;
-
-        for (i = 0; i < 2*WORDS; i++) begin
-            out_data[i*16 +: 16] = temp[i][15:0];
-        end
     end
+
+    // 出力
+    assign done = calc_done;
+
+    genvar gi;
+    generate
+        for (gi = 0; gi < WORDS; gi++) begin
+            assign product[gi] = temp[gi][15:0];
+        end
+    endgenerate
 
 endmodule
