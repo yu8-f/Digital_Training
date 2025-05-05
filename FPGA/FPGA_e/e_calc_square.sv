@@ -51,7 +51,11 @@ module e_calc_square #(
         case (state)
             IDLE: if (start) next_state = RUN;
             RUN: next_state = WAIT_MULTI;
-            WAIT_MULTI: if (multi_done) next_state = (count == LOG2_N-1) ? DONE : RUN;
+            WAIT_MULTI: if (multi_done)
+                            if (count == LOG2_N-1)
+                                next_state = DONE;
+                            else
+                                next_state = RUN;
             DONE: next_state = DONE;
             default: next_state = IDLE;
         endcase

@@ -1,6 +1,7 @@
 module e_calc_tb;
 
     parameter int WORDS = 32;
+    parameter int N = 32768;  // 2^15
     parameter int LOG2_N = 15;
 
     logic clk;
@@ -12,6 +13,7 @@ module e_calc_tb;
     // DUT（Device Under Test）インスタンス
     e_calc #(
         .WORDS(WORDS),
+        .N(N),
         .LOG2_N(LOG2_N)
     ) dut (
         .clk(clk),
@@ -31,7 +33,19 @@ module e_calc_tb;
     initial begin
         $dumpfile("e_calc.vcd");  // 波形出力ファイル名
         $dumpvars(0, e_calc_tb);  // すべての変数を記録
-
+        $dumpvars(0, dut);        // dutモジュール（e_calc）全体
+        $dumpvars(0, dut.squarer);        // dutモジュール（e_calc）全体
+        $dumpvars(0, dut.squarer.multiplier);        // dutモジュール（e_calc）全体
+        for (int i = 0; i < WORDS; i++) begin
+            $dumpvars(1, dut.result[i]);
+            $dumpvars(1, dut.one_plus_inv_n[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.square_out[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.multi_out[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.buffer[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.multiplier.A[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.multiplier.B[i]); // 👈 これを追加！！
+            $dumpvars(1, dut.squarer.multiplier.temp[i]); // 👈 これを追加！！
+        end
         rst_n = 0;
         start = 0;
         #20;
