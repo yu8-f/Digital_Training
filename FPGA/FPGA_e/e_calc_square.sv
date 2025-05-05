@@ -1,83 +1,72 @@
 module e_calc_square #(
-    parameter WORDS = 32
+    parameter WORDS = 32,
+    parameter LOG2_N = 15
 )(
-    input wire clk,
-    input wire rst_n,
-    input wire start,
-    input wire [15:0] in_data [0:WORDS-1],
-    output reg done,
-    output reg [15:0] out_data [0:WORDS-1]
+    input  logic clk,
+    input  logic rst_n,
+    input  logic start,
+    output logic done,
+    output logic [16*WORDS-1:0] out_data
 );
 
-    // 状態管理
-    localparam IDLE  = 2'd0;
-    localparam CALC  = 2'd1;
-    localparam DONE  = 2'd2;
+    typedef enum logic [1:0] {
+        IDLE,
+        RUN,
+        WAIT_MULTI,
+        DONE
+    } state_t;
 
-    reg [1:0] state;
-    reg [4:0] count; // log2(n)=15回とかなので5bitあれば十分
+    state_t state, next_state;
+    logic [16*WORDS-1:0] result;
+    logic [16*2*WORDS-1:0] multi_out;
+    logic multi_start;
+    logic multi_done;
+    logic [15:0] one_word;
+    integer count;
 
-    // 内部データ
-    reg [15:0] data [0:WORDS-1];
-
-    integer i;
-
-    // 多倍長掛け算のインスタンス呼び出し用
-    wire [15:0] mul_in_a [0:WORDS-1];
-    wire [15:0] mul_in_b [0:WORDS-1];
-    wire [15:0] mul_out [0:WORDS-1];
-
-    // 乗算器 (常に data×data を実行するイメージ)
-    e_multiplier #(
+    e_multi #(
         .WORDS(WORDS)
-    ) multiplier_inst (
-        .in_a(data),
-        .in_b(data),
-        .product(mul_out)
+    ) u_multi (
+        .in_a(result),
+        .in_b(result),
+        .out_data(multi_out)
     );
 
-    always @(posedge clk or negedge rst_n) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             state <= IDLE;
-            done <= 0;
             count <= 0;
-            for (i = 0; i < WORDS; i = i + 1) begin
-                data[i] <= 16'd0;
-                out_data[i] <= 16'd0;
-            end
+            result <= 0;
         end else begin
-            case (state)
-                IDLE: begin
-                    done <= 0;
-                    if (start) begin
-                        for (i = 0; i < WORDS; i = i + 1) begin
-                            data[i] <= in_data[i];
-                        end
-                        count <= 0;
-                        state <= CALC;
-                    end
-                end
-
-                CALC: begin
-                    // 計算開始
-                    for (i = 0; i < WORDS; i = i + 1) begin
-                        data[i] <= mul_out[i];
-                    end
-                    count <= count + 1;
-                    if (count == 15) begin // log2(32768) = 15
-                        state <= DONE;
-                    end
-                end
-
-                DONE: begin
-                    done <= 1;
-                    for (i = 0; i < WORDS; i = i + 1) begin
-                        out_data[i] <= data[i];
-                    end
-                    state <= IDLE; // 必要ならここでIDLEに戻る
-                end
-            endcase
+            state <= next_state;
+            if (state == RUN && next_state == WAIT_MULTI) begin
+                count <= count + 1;
+            end
+            if (state == IDLE && start) begin
+                // 初期値 (1 + 1/n)
+                result <= { {(WORDS-2){16'd0}}, 16'd1, 16'd1 };
+                count <= 0;
+            end else if (state == WAIT_MULTI && multi_done) begin
+                result <= multi_out[16*WORDS-1:0];
+            end
         end
     end
+
+    always_comb begin
+        next_state = state;
+        multi_start = 0;
+        case (state)
+            IDLE: if (start) next_state = RUN;
+            RUN: begin
+                multi_start = 1;
+                next_state = WAIT_MULTI;
+            end
+            WAIT_MULTI: if (multi_done) next_state = (count == LOG2_N-1) ? DONE : RUN;
+            DONE: next_state = DONE;
+        endcase
+    end
+
+    assign done = (state == DONE);
+    assign out_data = result;
 
 endmodule

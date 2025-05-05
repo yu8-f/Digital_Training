@@ -1,63 +1,51 @@
 `timescale 1ns/1ps
 
-module e_calculator_tb;
+module e_calc_tb;
 
     parameter WORDS = 32;
     parameter LOG2_N = 15;
 
-    reg clk;
-    reg rstn;
-    reg start;
-    wire done;
-    wire [15:0] result [0:2*WORDS-1];
+    logic clk;
+    logic rst_n;
+    logic start;
+    logic done;
+    logic [16*WORDS-1:0] out_data;
 
-    // テスト対象インスタンス
-    e_calculator #(
+    e_calc #(
         .WORDS(WORDS),
         .LOG2_N(LOG2_N)
     ) dut (
         .clk(clk),
-        .rstn(rstn),
+        .rst_n(rst_n),
         .start(start),
         .done(done),
-        .result(result)
+        .out_data(out_data)
     );
 
-    // クロック生成
     initial begin
         clk = 0;
-        forever #5 clk = ~clk;  // 100MHzクロック
+        forever #5 clk = ~clk;
     end
 
-    integer i;
-
-    // テストシナリオ
     initial begin
-        $display("=== Simulation Start ===");
-
-        rstn = 0;
+        rst_n = 0;
         start = 0;
         #20;
-        rstn = 1;
+        rst_n = 1;
         #20;
-
         start = 1;
         #10;
         start = 0;
+    end
 
-        // doneが立つまで待つ
-        wait (done == 1);
-
-        $display("Calculation Finished!");
-
-        // 結果出力
-        $display("Result (hex):");
-        for (i = 2*WORDS-1; i >= 0; i = i - 1) begin
-            $write("%h ", result[i]);
+    always_ff @(posedge clk) begin
+        if (done) begin
+            $display("Calculation done");
+            for (int i = WORDS-1; i >= 0; i = i - 1) begin
+                $display("%d: %d", i, out_data[i*16 +: 16]);
+            end
+            $finish;
         end
-        $display("\n");
-
-        $finish;
     end
 
 endmodule
