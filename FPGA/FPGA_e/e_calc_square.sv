@@ -1,6 +1,6 @@
 module e_calc_square #(
     parameter int WORDS = 32,
-    parameter int LOG2_N = 15  // 2^15回二乗する（例）
+    parameter int LOG2_N = 15  // 2^15回二乗する
 )(
     input  logic clk,
     input  logic rst_n,
@@ -12,10 +12,10 @@ module e_calc_square #(
 
     // 内部信号
     logic [15:0] buffer [0:WORDS-1];
+    logic [15:0] multi_out [0:WORDS-1];
     logic [3:0] count;
     logic multi_start;
     logic multi_done;
-    logic [15:0] multi_out [0:WORDS-1];
 
     typedef enum logic [1:0] {
         IDLE,
@@ -35,7 +35,7 @@ module e_calc_square #(
         .A(buffer),
         .B(buffer),
         .done(multi_done),
-        .product(multi_out)
+        .product()
     );
 
     // ステートマシン
@@ -68,6 +68,7 @@ module e_calc_square #(
             multi_start <= 0;
             for (int i = 0; i < WORDS; i++) begin
                 buffer[i] <= 0;
+                multi_out[i] <= 0;
             end
         end else begin
             case (state)
@@ -76,6 +77,7 @@ module e_calc_square #(
                     multi_start <= 0;
                     for (int i = 0; i < WORDS; i++) begin
                         buffer[i] <= in_data[i];
+                        multi_out[i] <= 0;
                     end
                 end
                 RUN: begin
@@ -85,8 +87,35 @@ module e_calc_square #(
                     multi_start <= 0;
                     if (multi_done) begin
                         count <= count + 1;
+
+                        // multiplier.productを一時保存
                         for (int i = 0; i < WORDS; i++) begin
-                            buffer[i] <= multi_out[i];
+                            multi_out[i] <= multiplier.product[i];
+                        end
+
+                        // --- 最上位1探索 ---
+                        int bit_one = 0;
+                        for (int i = 0; i < WORDS; i++) begin
+                            if (multiplier.product[i] != 16'b0) begin
+                                bit_one = i;
+                            end
+                        end
+
+                        if (bit_one >= 15) begin
+                            int shift = bit_one - 14; // 14番目に合わせるシフト量
+
+                            // シフトしてbufferに格納
+                            for (int i = 0; i < WORDS; i++) begin
+                                if (i <= 14)
+                                    buffer[i] <= multiplier.product[i + shift];
+                                else
+                                    buffer[i] <= 16'b0;
+                            end
+                        end else begin
+                            // シフトしない場合
+                            for (int i = 0; i < WORDS; i++) begin
+                                buffer[i] <= multiplier.product[i];
+                            end
                         end
                     end
                 end
@@ -98,6 +127,6 @@ module e_calc_square #(
     end
 
     assign done = (state == DONE);
-    assign out_data = buffer;
+    assign out_data = multi_out;  // ←ここ！！multi_outを直接出力！！
 
 endmodule

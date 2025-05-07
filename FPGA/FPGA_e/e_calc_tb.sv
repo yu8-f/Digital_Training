@@ -20,8 +20,32 @@ module e_calc_tb;
         .rst_n(rst_n),
         .start(start),
         .done(done),
-        .result(result)
+        .result()
     );
+    // 🔥 doneが立った瞬間にsquare_outをレジスタに保存する
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < WORDS; i++) begin
+                result[i] <= 16'd0;
+            end
+        end else if (done) begin
+            for (int i = 0; i < WORDS; i++) begin
+                result[i] <= dut.result[i];  // 🔥 square_outをレジスタに保存
+            end
+        end
+    end
+
+    // // fixed_to_real接続
+    // fixed_to_real #(
+    //     .WORDS(WORDS)
+    // ) fixed_to_real_inst (
+    //     .clk(clk),
+    //     .rst_n(rst_n),
+    //     .start(done),           // e_calc完了後にstart
+    //     .fixed_data(result),
+    //     .done(fixed_done),
+    //     .value(final_value)
+    // );
 
     // クロック生成
     initial begin

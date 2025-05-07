@@ -16,6 +16,9 @@ module e_calc #(
     logic square_done;
     logic [15:0] square_out [0:WORDS-1];
 
+    // 🔥 square_outを一時保存するレジスタ
+    logic [15:0] square_out_reg [0:WORDS-1];
+
     logic multi_done;
     logic [15:0] multi_out [0:WORDS-1];
 
@@ -110,8 +113,21 @@ module e_calc #(
         .start(start_square_pulse),
         .in_data(one_plus_inv_n),
         .done(square_done),
-        .out_data(square_out)
+        .out_data()
     );
+
+    // 🔥 square_doneが立った瞬間にsquare_outをレジスタに保存する
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < WORDS; i++) begin
+                square_out[i] <= 16'd0;
+            end
+        end else if (square_done) begin
+            for (int i = 0; i < WORDS; i++) begin
+                square_out[i] <= squarer.out_data[i];  // 🔥 square_outをレジスタに保存
+            end
+        end
+    end
 
     // ----------------------------
     // それにnをかけるインスタンス
@@ -122,13 +138,14 @@ module e_calc #(
         .clk(clk),
         .rst_n(rst_n),
         .start(start_multiply_pulse),
-        .A(square_out),
-        .B(one_plus_inv_n),  // ここBに"n"をかけるイメージ
+        .A(square_out_reg),  // 🔥 square_out_regを渡す！
+        .B(one_plus_inv_n),
         .done(multi_done),
         .product(multi_out)
     );
 
-    assign result = multi_out;
+    // assign result = multi_out;
+    assign result = square_out;
     assign done = (state == DONE);
 
 endmodule
