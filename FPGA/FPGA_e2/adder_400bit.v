@@ -5,32 +5,29 @@
 
 module adder_400bit (
     input wire clk,
-    input wire rst,                      // リセット
-    input wire start,                    // 加算開始信号
-    input wire [7:0] a [0:49],            // 入力a
-    input wire [7:0] b [0:49],            // 入力b
-    output reg [7:0] sum [0:49],          // 出力sum
-    output reg done                      // 加算完了フラグ
+    input wire rst,
+    input wire start,
+    input wire [399:0] a_flat,
+    input wire [399:0] b_flat,
+    output reg [399:0] sum_flat,
+    output reg done
 );
 
-    reg [6:0] idx;                        // 0〜49までのインデックス
-    reg carry;                            // キャリーフラグ（0 or 1）
+    reg carry;   // ★たった1bitだけ！
+    integer i;
 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk) begin
         if (rst) begin
-            idx <= 0;
-            carry <= 0;
+            sum_flat <= 0;
             done <= 0;
         end else if (start) begin
-            idx <= 0;
-            carry <= 0;
-            done <= 0;
-        end else if (idx < 50) begin
-            {carry, sum[idx]} <= a[idx] + b[idx] + carry;  // 足してキャリーもセット
-            idx <= idx + 1;
-            if (idx == 49) begin
-                done <= 1;  // 最後まで足したらdone=1
+            carry = 0;
+            for (i = 0; i < 50; i = i + 1) begin
+                {carry, sum_flat[i*8 +: 8]} <= a_flat[i*8 +: 8] + b_flat[i*8 +: 8] + carry;
             end
+            done <= 1;
+        end else begin
+            done <= 0;
         end
     end
 

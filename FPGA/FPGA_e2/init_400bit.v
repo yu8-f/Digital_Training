@@ -3,17 +3,14 @@
 `timescale 1ns / 1ps
 
 module init_400bit (
-    output reg [7:0] ans [0:49]  // ans[0]が整数部，ans[1]〜ans[49]が小数部
+    output reg [399:0] ans_flat  // 8bit × 50 = 400bit
 );
 
     integer i;
 
     initial begin
-        // 初期化
-        ans[0] = 8'h01;  // 最初の8bitを1にセット（整数部）
-        for (i = 1; i < 50; i = i + 1) begin
-            ans[i] = 8'h00;  // 残りは全部0
-        end
+        ans_flat = 0;
+        ans_flat[399 -: 8] = 8'h01;  // ans[0] (最上位の8bit) を1にセット
     end
 
 endmodule
