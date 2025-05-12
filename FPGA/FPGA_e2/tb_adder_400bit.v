@@ -8,9 +8,9 @@ module tb_adder_400bit;
     reg start;
 
     // 入出力
-    wire [7:0] sum [0:49];
-    reg [7:0] a [0:49];
-    reg [7:0] b [0:49];
+    wire [399:0] sum;
+    reg [399:0] a;
+    reg [399:0] b;
     wire done;
 
     integer i;
@@ -39,12 +39,14 @@ module tb_adder_400bit;
 
     // テストシーケンス
     initial begin
+
+        $dumpfile("tb_adder_400bit.vcd");
+        $dumpvars(0, tb_adder_400bit);
+
         // 初期化
         rst = 1;
         start = 0;
-        for (i = 0; i < 50; i = i + 1) begin
-            b[i] = 8'h01;  // bには全ビット1を入れる（簡単なテスト）
-        end
+        b = 0;
         #20;
         rst = 0;
         #20;
