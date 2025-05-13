@@ -83,7 +83,7 @@ module e_calc (
                             done <= 1;
                             state <= FINISH;
                         end else begin
-                            dividend <= init_ans;  // 1.0に戻す
+                            dividend <= quotient;  // 前回の商が次の割り算の被除数
                             divisor <= counter + 8'd1;
                             counter <= counter + 8'd1;
                             div_start <= 1;
