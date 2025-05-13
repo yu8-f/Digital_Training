@@ -41,6 +41,9 @@ module divider_400bit (
                 end else begin
                     index <= index + 1;
                 end
+            end else begin
+                // 演算中でない場合はdoneを0にする
+                done <= 0;
             end
         end
     end
