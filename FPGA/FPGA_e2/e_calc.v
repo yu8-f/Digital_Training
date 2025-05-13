@@ -99,8 +99,8 @@ module e_calc (
 
             endcase
         end
-        $display("STATE = %d", state);
-        $display("div_done = %b, add_done = %b, counter = %d", div_done, add_done, counter);
+        // $display("STATE = %d", state);
+        // $display("div_done = %b, add_done = %b, counter = %d", div_done, add_done, counter);
     end
 
 endmodule
