@@ -10,18 +10,19 @@ module tb_e_calc;
 
 
     // 10進変換器のインスタンス
-    wire [3:0] ascii_result [0:149];
+    wire [3:0] final_decimal;
+    wire conv_valid;
     wire conv_done;
     reg conv_start;
-    integer i;
 
     convert_to_10 conv (
         .clk(clk),
         .rst(rst),
         .start(conv_start),
         .binary(ans),
-        .done(conv_done),
-        .decimal_digits(ascii_result)
+        .decimal(final_decimal),
+        .valid(conv_valid),
+        .done(conv_done)
     );
 
 
@@ -36,6 +37,17 @@ module tb_e_calc;
 
     // クロック生成（10ns周期 = 100MHz）
     always #5 clk = ~clk;
+
+    // 出力を監視して表示
+    always @(posedge clk) begin
+        if (conv_valid) begin
+            $display("%0d", final_decimal);
+        end
+        if (conv_done) begin
+            $display("\n Calculation done.");
+            $finish;
+        end
+    end
 
     initial begin
         $dumpfile("tb_e_calc.vcd");  // 波形出力
@@ -57,16 +69,22 @@ module tb_e_calc;
 
         // 10進変換器のスタート信号を出す
         conv_start = 1;
-        #10;
+        #20;
         conv_start = 0;
-        wait (conv_done == 1);
         // $display("e = ");
-        for (i = 0; i < 150; i = i + 1) begin
-            if (ascii_result[i] != " ") $display("%d", ascii_result[i]);
-        end
+        // for (i = 0; i < 150; i = i + 1) begin
+        //     if (ascii_result[i] != " ") $display("%d", ascii_result[i]);
+        // end
 
         // 計算完了後、結果表示
         // $display("e = %h", ans);  // 16進数で出力
+        // $finish;
+    end
+
+    // タイムアウト防止（例えば500usで終了）
+    initial begin
+        #500000;
+        $display("\n Timeout: Simulation took too long.");
         $finish;
     end
 
