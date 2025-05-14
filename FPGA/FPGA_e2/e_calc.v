@@ -89,7 +89,7 @@ module e_calc (
                             div_start <= 1;
                             state <= DIVIDE;
                         end
-                        $display("%h", ans);  // 16進数で出力
+                        // $display("%h", ans);  // 16進数で出力
                     end
                 end
 

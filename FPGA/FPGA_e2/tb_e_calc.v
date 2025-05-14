@@ -8,6 +8,23 @@ module tb_e_calc;
     wire done;
     wire [399:0] ans;
 
+
+    // 10進変換器のインスタンス
+    wire [3:0] ascii_result [0:149];
+    wire conv_done;
+    reg conv_start;
+    integer i;
+
+    convert_to_10 conv (
+        .clk(clk),
+        .rst(rst),
+        .start(conv_start),
+        .binary(ans),
+        .done(conv_done),
+        .decimal_digits(ascii_result)
+    );
+
+
     // e_calc モジュールをインスタンス化
     e_calc uut (
         .clk(clk),
@@ -38,8 +55,18 @@ module tb_e_calc;
         // 計算完了を待つ
         wait (done == 1);
 
+        // 10進変換器のスタート信号を出す
+        conv_start = 1;
+        #10;
+        conv_start = 0;
+        wait (conv_done == 1);
+        // $display("e = ");
+        for (i = 0; i < 150; i = i + 1) begin
+            if (ascii_result[i] != " ") $display("%d", ascii_result[i]);
+        end
+
         // 計算完了後、結果表示
-        $display("e = %h", ans);  // 16進数で出力
+        // $display("e = %h", ans);  // 16進数で出力
         $finish;
     end
 
