@@ -36,3 +36,9 @@ Thumbs.db
 node_modules/
 dist/
 build/
+
+# Quartus2で生成されるファイル
+db/
+hc_output/
+incremental_db/
+output_files/

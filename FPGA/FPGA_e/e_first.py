@@ -3,7 +3,7 @@ from decimal import Decimal, getcontext
 # 小数点以下100桁＋余裕をもたせる
 getcontext().prec = 110
 
-n = 2**32
+n = 2**16
 n_decimal = Decimal(n)
 
 # e ≈ (1 + 1/n)^n
@@ -20,12 +20,10 @@ result = integer_part + '.' + fractional_part
 
 print(result)
 
-bit_one = 0
-for i in range(32):
-    if buffer[i] != 0:
-        bit_one = i
-if bit_one >= 15:
-    for i in range(0, 15):
-        buffer[i] = buffer[i + (bit_one-14)]
-    for i in range(15, 32):
-        buffer[i] = 0
+result_str = str(result)
+ideal = "2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642742746639193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901"
+
+for i in range(len(ideal)):
+    if result_str[i] != ideal[i]:
+        print(f"{i}桁目が違います: {result_str[:i]} \'{result_str[i]}\'")
+        break

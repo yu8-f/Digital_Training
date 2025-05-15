@@ -1,14 +1,21 @@
 `timescale 1ns / 1ps
 
 module top_e_display (
-    input wire clk,        // 50MHz or 100MHz クロック
-    input wire rst,
-    output reg [6:0] seg [5:0]  // 6桁の7セグ（flattenで対応するなら変更必要）
+    input wire CLOCK_50,    // 50MHz クロック
+    input wire [3:0] KEY,   // リセット用
+    output reg [6:0] HEX0,  // 6つの7セグ
+    output reg [6:0] HEX1,
+    output reg [6:0] HEX2,
+    output reg [6:0] HEX3,
+    output reg [6:0] HEX4,
+    output reg [6:0] HEX5
 );
 
     wire [399:0] ans;
     wire done;
     reg start;
+    wire rst;
+    assign rst = ~KEY[0];  // KEYは押されてると0を出す
 
     // convert_to_10 接続
     wire [3:0] decimal;
@@ -16,7 +23,7 @@ module top_e_display (
     reg conv_start;
 
     convert_to_10 conv (
-        .clk(clk),
+        .clk(CLOCK_50),
         .rst(rst),
         .start(conv_start),
         .binary(ans),
@@ -27,7 +34,7 @@ module top_e_display (
 
     // e_calc 接続
     e_calc ecalc (
-        .clk(clk),
+        .clk(CLOCK_50),
         .rst(rst),
         .start(start),
         .done(done),
@@ -64,7 +71,7 @@ module top_e_display (
 
     reg [1:0] state;
 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge CLOCK_50 or posedge rst) begin
         if (rst) begin
             start <= 0;
             conv_start <= 0;
@@ -125,12 +132,12 @@ module top_e_display (
 
     // 出力反映
     always @(*) begin
-        seg[0] = seg_digits[0];
-        seg[1] = seg_digits[1];
-        seg[2] = seg_digits[2];
-        seg[3] = seg_digits[3];
-        seg[4] = seg_digits[4];
-        seg[5] = seg_digits[5];
+        HEX0 = seg_digits[0];
+        HEX1 = seg_digits[1];
+        HEX2 = seg_digits[2];
+        HEX3 = seg_digits[3];
+        HEX4 = seg_digits[4];
+        HEX5 = seg_digits[5];
     end
 
 endmodule
