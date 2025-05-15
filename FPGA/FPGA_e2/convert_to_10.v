@@ -35,7 +35,7 @@ module convert_to_10 (
                 decimal <= shift_reg[395:392];
 
                 // 2. 上位8bitを0クリア
-                shift_reg[399:392] <= 8'h00;
+                shift_reg[399:392] = 8'h00;
 
                 // 3. シフト加算 ans = ans * 10
                 // 10 * n = (n << 3) + (n << 1)

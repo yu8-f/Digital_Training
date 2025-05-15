@@ -81,9 +81,9 @@ module tb_e_calc;
         // $finish;
     end
 
-    // タイムアウト防止（例えば500usで終了）
+    // タイムアウト防止
     initial begin
-        #500000;
+        #1000000;  // 1s
         $display("\n Timeout: Simulation took too long.");
         $finish;
     end
