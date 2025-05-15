@@ -25,6 +25,7 @@ module SEG_HEX (
     input [3:0] iDIG;
     output [6:0] oHEX_D;
     reg [6:0] oHEX_D;
+
     always @(iDIG) begin
         case(iDIG)
             4'h0: oHEX_D <= ~(`SEG_OUT_0);
