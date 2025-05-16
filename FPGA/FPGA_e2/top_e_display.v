@@ -132,12 +132,12 @@ module top_e_display (
 
     // 出力反映
     always @(*) begin
-        HEX0 = seg_digits[0];
-        HEX1 = seg_digits[1];
-        HEX2 = seg_digits[2];
-        HEX3 = seg_digits[3];
-        HEX4 = seg_digits[4];
-        HEX5 = seg_digits[5];
+        HEX0 <= seg_digits[0];
+        HEX1 <= seg_digits[1];
+        HEX2 <= seg_digits[2];
+        HEX3 <= seg_digits[3];
+        HEX4 <= seg_digits[4];
+        HEX5 <= seg_digits[5];
     end
 
 endmodule
