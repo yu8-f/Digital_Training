@@ -35,6 +35,7 @@ Thumbs.db
 node_modules/
 dist/
 build/
+PLL論文/English.txt
 
 # Quartus2で生成されるファイル
 db/
