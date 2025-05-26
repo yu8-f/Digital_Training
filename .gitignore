@@ -13,7 +13,6 @@
 # シミュレーションファイル (Verilog/VHDLなどでよく出るもの)
 *.vvp
 *.lxt
-*.vcd
 *.fst
 *.saif
 *.wlf
