@@ -14,18 +14,24 @@
 - 波形ビューア：GTKWave
 - エディタ：VSCode + 拡張機能
 
-## 💡 メモ
+## 💡 メモ・備忘録
 - ビルド手順：
-    ```bash
-    iverilog -o build/top.out src/top.v
-    vvp build/top.out
-    ```
+  ```bash
+  iverilog -o build/top.out src/top.v
+  vvp build/top.out
+  ```
 
-* 波形ファイル（`.vcd`）をGTKWaveで開くとき：
+- 波形ファイル（`.vcd`）をGTKWaveで開くとき：
 
   ```bash
   gtkwave dump.vcd
   ```
+
+- .mdをPDFで保存するとき
+
+  1. 対象の.mdファイルを開き、右上のプレビューマークをクリック
+  2. 右側に表示されたプレビュー内で右クリック
+  3. Export/Chrome (Puppeteer)/PDFをクリックで保存完了
 
 ## 📌 TODO
 
